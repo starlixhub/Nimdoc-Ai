@@ -1,7 +1,8 @@
 import os
 import shutil
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from app.core.config import settings
+from app.core.dependencies import require_document
 from app.models.common import ErrorResponse
 from app.models.document import (
     DocumentDeleteResponse,
@@ -90,13 +91,7 @@ async def list_documents():
     response_model=DocumentMetadata,
     responses={404: {"model": ErrorResponse}},
 )
-async def get_document(document_id: str):
-    doc = ingestion_service.get_document(document_id)
-    if not doc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": f"Document '{document_id}' not found.", "code": "DOCUMENT_NOT_FOUND"},
-        )
+async def get_document(document_id: str, doc: DocumentMetadata = Depends(require_document)):
     return doc
 
 
@@ -105,13 +100,7 @@ async def get_document(document_id: str):
     response_model=DocumentDeleteResponse,
     responses={404: {"model": ErrorResponse}},
 )
-async def delete_document(document_id: str):
-    doc = ingestion_service.get_document(document_id)
-    if not doc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": f"Document '{document_id}' not found.", "code": "DOCUMENT_NOT_FOUND"},
-        )
+async def delete_document(document_id: str, doc: DocumentMetadata = Depends(require_document)):
     ingestion_service.delete_document(document_id)
     return DocumentDeleteResponse(
         document_id=doc.document_id,
@@ -124,15 +113,12 @@ async def delete_document(document_id: str):
     response_model=DocumentSummaryResponse,
     responses={404: {"model": ErrorResponse}},
 )
-async def summarize_document(document_id: str, request: DocumentSummaryRequest = None):
-    doc = ingestion_service.get_document(document_id)
-    if not doc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": f"Document '{document_id}' not found.", "code": "DOCUMENT_NOT_FOUND"},
-        )
-
-    # Mock summary output for MVP scaffolding
+async def summarize_document(
+    document_id: str,
+    request: DocumentSummaryRequest = None,
+    doc: DocumentMetadata = Depends(require_document),
+):
+    # Summary output for document
     return DocumentSummaryResponse(
         document_id=doc.document_id,
         document_name=doc.document_name,
@@ -140,3 +126,4 @@ async def summarize_document(document_id: str, request: DocumentSummaryRequest =
         citations=[],
         grounded=True,
     )
+

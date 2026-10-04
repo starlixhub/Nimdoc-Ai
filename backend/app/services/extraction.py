@@ -1,6 +1,10 @@
 import os
 from typing import Dict, List, Optional
-import fitz  # PyMuPDF
+
+try:
+    import fitz  # PyMuPDF
+except ImportError:
+    fitz = None
 
 
 class ExtractionService:
@@ -14,6 +18,12 @@ class ExtractionService:
         """
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"File not found at path: {file_path}")
+
+        if fitz is None:
+            raise RuntimeError(
+                "PyMuPDF ('fitz') is not installed in the current Python environment. "
+                "Please run 'pip install pymupdf' to enable PDF text extraction."
+            )
 
         extracted_pages = []
         doc = fitz.open(file_path)
@@ -29,6 +39,7 @@ class ExtractionService:
             doc.close()
 
         return extracted_pages
+
 
 
 extraction_service = ExtractionService()
