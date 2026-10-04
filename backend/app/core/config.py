@@ -1,5 +1,5 @@
 from typing import List
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     nebius_api_key: str = "mock_nebius_key"
     nebius_api_base_url: str = "https://api.tokenfactory.nebius.ai/v1"
     llm_model_name: str = "nvidia/meta-llama-3.1-8b-instruct"
+    llm_timeout_seconds: int = 30
 
     # RAG & Embedding Settings
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
@@ -30,11 +31,12 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> List[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        extra = "ignore"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 settings = Settings()
