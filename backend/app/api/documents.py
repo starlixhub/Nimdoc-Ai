@@ -8,6 +8,7 @@ from app.models.document import (
     DocumentDeleteResponse,
     DocumentListResponse,
     DocumentMetadata,
+    DocumentStatusResponse,
     DocumentSummaryRequest,
     DocumentSummaryResponse,
     DocumentUploadResponse,
@@ -35,7 +36,16 @@ async def upload_document(file: UploadFile = File(...)):
             detail={"error": "File type is not supported. Supported types: pdf", "code": "UNSUPPORTED_FILE_TYPE"},
         )
 
-    # 2. Ensure upload dir exists
+    # 2. Validate PDF magic bytes (%PDF-)
+    header = await file.read(1024)
+    if b"%PDF-" not in header:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": "Uploaded file is not a valid PDF document (magic bytes signature missing).", "code": "INVALID_PDF_FORMAT"},
+        )
+    await file.seek(0)
+
+    # 3. Ensure upload dir exists
     os.makedirs(settings.upload_dir, exist_ok=True)
     temp_path = os.path.join(settings.upload_dir, file.filename)
 
@@ -84,6 +94,23 @@ async def upload_document(file: UploadFile = File(...)):
 async def list_documents():
     docs = ingestion_service.list_documents()
     return DocumentListResponse(documents=docs, total=len(docs))
+
+
+@router.get(
+    "/{document_id}/status",
+    response_model=DocumentStatusResponse,
+    responses={404: {"model": ErrorResponse}},
+)
+async def get_document_status(document_id: str, doc: DocumentMetadata = Depends(require_document)):
+    return DocumentStatusResponse(
+        document_id=doc.document_id,
+        document_name=doc.document_name,
+        status=doc.status,
+        chunk_count=doc.chunk_count,
+        page_count=doc.page_count,
+        file_size_bytes=doc.file_size_bytes,
+        uploaded_at=doc.uploaded_at,
+    )
 
 
 @router.get(

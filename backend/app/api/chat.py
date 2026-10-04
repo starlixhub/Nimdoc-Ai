@@ -1,4 +1,7 @@
+import asyncio
 from fastapi import APIRouter, HTTPException, status
+import httpx
+from app.core.config import settings
 from app.models.chat import (
     ChatRequest,
     ChatResponse,
@@ -18,7 +21,10 @@ router = APIRouter(prefix="/api/chat", tags=["Chat"])
     responses={
         400: {"model": ErrorResponse},
         404: {"model": ErrorResponse},
+        429: {"model": ErrorResponse},
         500: {"model": ErrorResponse},
+        502: {"model": ErrorResponse},
+        504: {"model": ErrorResponse},
     },
 )
 async def chat(request: ChatRequest):
@@ -34,10 +40,13 @@ async def chat(request: ChatRequest):
         )
 
     try:
-        response = await rag_service.answer_question(
-            question=request.question,
-            document_ids=request.document_ids,
-            session_id=request.session_id,
+        response = await asyncio.wait_for(
+            rag_service.answer_question(
+                question=request.question,
+                document_ids=request.document_ids,
+                session_id=request.session_id,
+            ),
+            timeout=float(settings.llm_timeout_seconds),
         )
 
         # Record conversation turn in session history
@@ -58,6 +67,30 @@ async def chat(request: ChatRequest):
         )
 
         return response
+    except (asyncio.TimeoutError, httpx.TimeoutException):
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail={"error": "LLM request timed out. Please try again.", "code": "GATEWAY_TIMEOUT"},
+        )
+    except httpx.HTTPStatusError as e:
+        status_code = e.response.status_code
+        if status_code in (401, 403):
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={"error": "LLM provider authentication failed. Check API key.", "code": "LLM_AUTH_FAILED"},
+            )
+        elif status_code == 429:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail={"error": "LLM rate limit reached. Please wait and retry.", "code": "RATE_LIMIT_EXCEEDED"},
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={"error": f"LLM provider error: {e.response.text}", "code": "UPSTREAM_ERROR"},
+            )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

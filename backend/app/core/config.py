@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     nebius_api_key: str = "mock_nebius_key"
     nebius_api_base_url: str = "https://api.tokenfactory.nebius.ai/v1"
     llm_model_name: str = "nvidia/meta-llama-3.1-8b-instruct"
+    llm_timeout_seconds: int = 30
 
     # RAG & Embedding Settings
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"

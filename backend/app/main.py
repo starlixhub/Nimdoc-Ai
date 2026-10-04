@@ -5,7 +5,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.chat import router as chat_router
 from app.api.documents import router as documents_router
+from app.api.sessions import router as sessions_router
 from app.core.config import settings
+from app.core.middleware import GlobalExceptionMiddleware, RequestLoggingMiddleware
 
 logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger(__name__)
@@ -29,6 +31,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Configure Middleware (Logging & Exception handling)
+app.add_middleware(GlobalExceptionMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
@@ -41,6 +47,7 @@ app.add_middleware(
 # Register routers
 app.include_router(documents_router)
 app.include_router(chat_router)
+app.include_router(sessions_router)
 
 
 

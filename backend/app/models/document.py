@@ -22,6 +22,16 @@ class DocumentUploadResponse(BaseModel):
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class DocumentStatusResponse(BaseModel):
+    document_id: str
+    document_name: str
+    status: str = Field(..., description="'processing', 'ready', or 'failed'")
+    chunk_count: Optional[int] = None
+    page_count: Optional[int] = None
+    file_size_bytes: int
+    uploaded_at: datetime
+
+
 class DocumentListResponse(BaseModel):
     documents: List[DocumentMetadata]
     total: int

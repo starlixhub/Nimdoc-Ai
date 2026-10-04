@@ -37,3 +37,33 @@ class ChatSessionHistory(BaseModel):
     session_id: str
     turns: List[ChatTurn] = []
     turn_count: int = 0
+
+
+class SessionSummary(BaseModel):
+    session_id: str
+    title: Optional[str] = None
+    turn_count: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class SessionCreateRequest(BaseModel):
+    title: Optional[str] = None
+    session_id: Optional[str] = None
+
+
+class SessionCreateResponse(BaseModel):
+    session_id: str
+    title: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    message: str = "Chat session created successfully."
+
+
+class SessionListResponse(BaseModel):
+    sessions: List[SessionSummary]
+    total: int
+
+
+class SessionDeleteResponse(BaseModel):
+    session_id: str
+    message: str = "Session deleted successfully."
