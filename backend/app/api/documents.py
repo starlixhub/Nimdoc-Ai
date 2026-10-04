@@ -1,6 +1,7 @@
 import os
 import shutil
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.core.dependencies import require_document
 from app.models.common import ErrorResponse
@@ -110,6 +111,31 @@ async def get_document_status(document_id: str, doc: DocumentMetadata = Depends(
         page_count=doc.page_count,
         file_size_bytes=doc.file_size_bytes,
         uploaded_at=doc.uploaded_at,
+    )
+
+
+@router.get(
+    "/{document_id}/file",
+    responses={
+        200: {
+            "content": {"application/pdf": {}},
+            "description": "Returns the raw PDF file stream for preview or download.",
+        },
+        404: {"model": ErrorResponse},
+    },
+)
+async def get_document_file(document_id: str, doc: DocumentMetadata = Depends(require_document)):
+    file_path = doc.file_path or os.path.join(settings.upload_dir, doc.document_name)
+    if not os.path.exists(file_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": f"File for document '{document_id}' not found on server disk.", "code": "FILE_NOT_FOUND"},
+        )
+    return FileResponse(
+        path=file_path,
+        media_type="application/pdf",
+        filename=doc.document_name,
+        headers={"Content-Disposition": f"inline; filename=\"{doc.document_name}\""},
     )
 
 

@@ -11,6 +11,7 @@ class DocumentMetadata(BaseModel):
     page_count: Optional[int] = None
     status: str = Field(..., description="'processing', 'ready', or 'failed'")
     chunk_count: Optional[int] = None
+    file_path: Optional[str] = None
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 

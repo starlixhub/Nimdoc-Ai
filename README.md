@@ -154,6 +154,7 @@ Services exposed:
 | `GET` | `/api/documents` | List all uploaded documents with metadata |
 | `GET` | `/api/documents/{id}` | Get single document metadata |
 | `GET` | `/api/documents/{id}/status` | Poll document processing status (`processing`, `ready`, `failed`) |
+| `GET` | `/api/documents/{id}/file` | Stream raw PDF for in-browser preview or download |
 | `DELETE` | `/api/documents/{id}` | Delete document and associated chunks |
 | `POST` | `/api/documents/{id}/summary` | Generate grounded summary of a document |
 
@@ -168,7 +169,8 @@ Services exposed:
 ### Chat API (`/api/chat`)
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/chat` | Send question + document IDs; returns grounded answer + citations |
+| `POST` | `/api/chat` | Send question + document IDs; returns grounded answer + citations (JSON) |
+| `POST` | `/api/chat/stream` | Real-time Server-Sent Events (SSE) streaming (`metadata`, `token`, `done`, `error`) |
 | `GET` | `/api/chat/{session_id}` | Get turn history for a session (alias for backward compatibility) |
 
 ---

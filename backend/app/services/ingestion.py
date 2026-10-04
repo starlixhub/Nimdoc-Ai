@@ -22,6 +22,7 @@ class IngestionService:
             document_id=doc_id,
             document_name=file_name,
             file_size_bytes=file_size,
+            file_path=file_path,
             status="processing",
         )
         self._documents[doc_id] = doc_meta
