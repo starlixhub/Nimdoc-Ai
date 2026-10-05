@@ -1,0 +1,273 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, Arial, sans-serif;
+  background: #0b0d10;
+  color: #ffffff;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  background: #0b0d10;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  padding: 24px 18px;
+  background: #111419;
+  border-right: 1px solid #242830;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.brand h2 {
+  font-size: 21px;
+}
+
+.new-chat {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #111111;
+  font-weight: 600;
+  margin-bottom: 28px;
+}
+
+.new-chat:hover {
+  opacity: 0.85;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav p,
+.sidebar-bottom p {
+  padding: 11px 12px;
+  border-radius: 8px;
+  color: #a9afb9;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.nav p:hover,
+.sidebar-bottom p:hover,
+.nav .active {
+  background: #1b1f26;
+  color: #ffffff;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+}
+
+/* Main */
+.main-content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  padding: 50px;
+  margin: 0 auto;
+}
+
+/* Header */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.topbar h1 {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.topbar p {
+  color: #9ca3af;
+  font-size: 15px;
+}
+
+.profile {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #242830;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Upload Card */
+.upload-card {
+  padding: 45px 30px;
+  border: 1px solid #282d36;
+  border-radius: 18px;
+  background: #12151a;
+  text-align: center;
+}
+
+.upload-icon {
+  width: 55px;
+  height: 55px;
+  margin: 0 auto 20px;
+  border-radius: 14px;
+  background: #1d222a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+}
+
+.upload-card h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.upload-card > p {
+  color: #9ca3af;
+  max-width: 550px;
+  margin: 0 auto 25px;
+  line-height: 1.6;
+}
+
+.upload-btn {
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #111111;
+  font-weight: 600;
+}
+
+.upload-btn:hover {
+  opacity: 0.85;
+}
+
+.upload-card > span {
+  display: block;
+  margin-top: 14px;
+  color: #6f7682;
+  font-size: 12px;
+}
+
+.selected-file {
+  margin-top: 15px !important;
+  color: #ffffff !important;
+  font-size: 14px;
+}
+
+/* Quick Actions */
+.quick-section {
+  margin-top: 40px;
+}
+
+.quick-section > h2 {
+  font-size: 20px;
+  margin-bottom: 18px;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.quick-card {
+  padding: 24px;
+  border: 1px solid #282d36;
+  border-radius: 14px;
+  background: #12151a;
+  transition: 0.2s;
+}
+
+.quick-card:hover {
+  background: #171b21;
+  transform: translateY(-2px);
+}
+
+.quick-card > div {
+  font-size: 25px;
+  margin-bottom: 15px;
+}
+
+.quick-card h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.quick-card p {
+  color: #8f96a3;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Mobile */
+@media (max-width: 800px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .main-content {
+    padding: 30px 20px;
+  }
+
+  .quick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar h1 {
+    font-size: 27px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    padding: 25px 16px;
+  }
+
+  .upload-card {
+    padding: 35px 20px;
+  }
+}
