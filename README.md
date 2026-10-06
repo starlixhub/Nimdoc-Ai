@@ -42,6 +42,25 @@
 
 ---
 
+## Frontend Quickstart
+
+### Prerequisites
+- Node.js 18+
+- npm / yarn / pnpm
+
+### Run Frontend Development Server
+```bash
+# Install dependencies
+npm install
+
+# Run Vite dev server
+npm run dev
+```
+
+The frontend app will be available at `http://localhost:5173`.
+
+---
+
 ## Backend Quickstart
 
 ### Prerequisites
@@ -50,13 +69,6 @@
 - Docker & Docker Compose (optional, for containerized run)
 
 ### 1. Local Environment Setup
-
-Clone repository and checkout the `Backend` branch:
-```bash
-git clone https://github.com/starlixhub/Nimdoc-Ai.git
-cd Nimdoc-Ai
-git checkout Backend
-```
 
 Create a virtual environment and install dependencies:
 ```bash
@@ -150,49 +162,42 @@ Services exposed:
 ### Documents API (`/api/documents`)
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/documents/upload` | Upload PDF file (validates MIME `%PDF-` signature & file size limit) |
-| `GET` | `/api/documents` | List all uploaded documents with metadata |
-| `GET` | `/api/documents/{id}` | Get single document metadata |
-| `GET` | `/api/documents/{id}/status` | Poll document processing status (`processing`, `ready`, `failed`) |
-| `DELETE` | `/api/documents/{id}` | Delete document and associated chunks |
-| `POST` | `/api/documents/{id}/summary` | Generate grounded summary of a document |
-
-### Sessions API (`/api/sessions`)
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/sessions` | Create a new chat session with optional title |
-| `GET` | `/api/sessions` | List all active chat sessions with turn counts & timestamps |
-| `GET` | `/api/sessions/{session_id}` | Retrieve full conversation turn history for a session |
-| `DELETE` | `/api/sessions/{session_id}` | Delete a conversation session |
+| `POST` | `/api/documents/upload` | Upload PDF file (multipart form) with magic-byte validation |
+| `GET` | `/api/documents/{doc_id}/status` | Check extraction/indexing status of a document |
+| `GET` | `/api/documents` | List all ingested documents |
+| `DELETE` | `/api/documents/{doc_id}` | Delete document and remove its embeddings |
+| `POST` | `/api/documents/{doc_id}/summarize` | Generate document summary and key points |
 
 ### Chat API (`/api/chat`)
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/api/chat` | Send question + document IDs; returns grounded answer + citations |
-| `GET` | `/api/chat/{session_id}` | Get turn history for a session (alias for backward compatibility) |
+| `POST` | `/api/chat` | Send question, retrieve relevant chunks, and return grounded answer with citations |
+
+### Sessions API (`/api/sessions`)
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/sessions` | Initialize new conversation session |
+| `GET` | `/api/sessions` | List active sessions |
+| `GET` | `/api/sessions/{session_id}/history` | Retrieve full multi-turn history |
+| `DELETE` | `/api/sessions/{session_id}` | Clear conversation session |
 
 ---
 
-## Error Handling & Diagnostic Headers
+## Error Handling & Status Codes
 
-All responses include diagnostic headers:
-- `X-Request-ID`: Unique tracking UUID for distributed request tracing
-- `X-Process-Time-Ms`: Round-trip request processing latency in milliseconds
-
-Error responses adhere to standard JSON error format:
+All errors follow a unified response shape:
 ```json
 {
-  "error": "Error description",
-  "detail": "Detailed context or validation failure",
-  "code": "ERROR_CODE",
-  "status_code": 400
+  "error": "ErrorType",
+  "detail": "Human-readable explanation",
+  "request_id": "req-uuid"
 }
 ```
+
 Specific HTTP status codes mapped:
-- `400 Bad Request`: Validation failure (empty question, missing document IDs, invalid magic bytes)
+- `400 Bad Request`: Invalid file type, corrupt PDF, or malformed request payload
 - `404 Not Found`: Document or session not found
-- `413 Payload Too Large`: Upload exceeds maximum file size limit (`MAX_UPLOAD_SIZE_MB`)
-- `429 Too Many Requests`: Upstream LLM rate limit exceeded
+- `422 Unprocessable Entity`: Validation failure on input parameters
 - `502 Bad Gateway`: Upstream LLM provider authentication or connectivity failure
 - `504 Gateway Timeout`: LLM inference timeout guard triggered (`LLM_TIMEOUT_SECONDS`)
 - `500 Internal Server Error`: Unhandled server exception
